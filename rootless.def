@@ -1,0 +1,14 @@
+Bootstrap: scratch
+
+%files
+    busybox /busybox
+    busybox /bin/sh
+    preconfigure.sh /preconfigure.sh
+
+%post
+    /busybox touch /etc/passwd
+    /busybox touch /etc/group
+    /busybox touch /etc/localtime
+
+%runscript
+    exec -- "$@"

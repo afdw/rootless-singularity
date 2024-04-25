@@ -1,0 +1,11 @@
+/busybox
+/rootless.sif
+/archlinux-bootstrap-x86_64.tar.gz
+/fakeroot-x86_64.pkg.tar.zst
+/root.x86_64
+/fakeroot-x86_64
+/rootless-singularity-install
+/rootless-singularity-install.tar.gz
+
+/old.txt
+/old
