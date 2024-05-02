@@ -1,6 +1,6 @@
 /busybox
 /rootless.sif
-/archlinux-bootstrap-x86_64.tar.gz
+/archlinux-bootstrap-x86_64.tar.zst
 /fakeroot-x86_64.pkg.tar.zst
 /root.x86_64
 /fakeroot-x86_64

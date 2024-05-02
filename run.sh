@@ -8,6 +8,25 @@ if command -v module &> /dev/null; then
     module load singularity
 fi
 
+if [[ $1 = "--no-import" ]]; then
+    shift
+else
+    LEAD='### BEGIN IMPORTED CONTENTS'
+    TAIL='### END IMPORTED CONTENTS'
+    for FILE in passwd group resolv.conf; do
+        [ "$(sed -n "1{/^$LEAD/p};q" $SCRIPT_DIR/root.x86_64/etc/$FILE)" ] || sed -i "1s/^/$LEAD\n$TAIL\n/" $SCRIPT_DIR/root.x86_64/etc/$FILE
+        cat /etc/$FILE > $SCRIPT_DIR/root.x86_64/etc/$FILE-overlay
+        sed -ie "/^$LEAD$/,/^$TAIL$/{ /^$LEAD$/{p; r $SCRIPT_DIR/root.x86_64/etc/$FILE-overlay
+                }; /^$TAIL$/p; d }" $SCRIPT_DIR/root.x86_64/etc/$FILE
+    done
+fi
+
+if [ -S /var/lib/sss/pipes/nss ]; then
+    SSS_BIND="--bind /var/lib/sss/pipes/nss:/var/lib/sss/pipes/nss"
+else
+    SSS_BIND=""
+fi
+
 if [ -d /scratch ]; then
     SCRATCH_BIND="--bind /scratch:/scratch:rw"
 else
@@ -26,7 +45,8 @@ if [ $# -eq 0 ]; then
     echo "Entering singularity"
 fi
 
-export SINGULARITYENV_PATH=$PATH
+export SINGULARITYENV_PATH="/usr/local/bin:$PATH"
+export SINGULARITYENV_PS1="$PS1"
 
 exec singularity run \
     --bind $SCRIPT_DIR/root.x86_64/usr/bin:/bin:rw \
@@ -42,9 +62,7 @@ exec singularity run \
     --bind $SCRIPT_DIR/root.x86_64/srv:/srv:rw \
     --bind $SCRIPT_DIR/root.x86_64/usr:/usr:rw \
     --bind $SCRIPT_DIR/root.x86_64/var:/var:rw \
-    --bind /etc/passwd:/etc/passwd:ro \
-    --bind /etc/group:/etc/group:ro \
-    --bind /etc/resolv.conf:/etc/resolv.conf:ro \
+    $SSS_BIND \
     $SCRATCH_BIND \
     $NV \
     $SCRIPT_DIR/rootless.sif \
